@@ -1,5 +1,9 @@
 import Constants from 'expo-constants';
-import { Platform } from 'react-native';
+// import { Platform } from 'react-native';
+
+const prefix = 'Simple Analytics:'
+
+let didWarn = false
 
 export default function SimpleAnalyticsTracker(screenName) {
   const iosBundleIdentifier = (
@@ -17,14 +21,30 @@ export default function SimpleAnalyticsTracker(screenName) {
     : null
 
   Constants.getWebViewUserAgentAsync().then(userAgent => {
-    const options = {
+    const namespace = iosBundleIdentifier || androidBundleIdentifier || null
+
+    if (!namespace) {
+      if (didWarn) return
+      didWarn = true
+      return console.warn(`${prefix} Not sending data because BundleID is not set`)
+    }
+
+    const body = {
       screen: screenName,
-      hostname: iosBundleIdentifier || androidBundleIdentifier || null,
+      url: `app://${namespace}/${screenName.replace(/[^a-zA-Z-/_]/gi, '-')}`,
       ua: userAgent,
-      platform: Platform.OS
     }
 
     // Send this data to Simple Analytics endpoint
-    console.log(options)
-  }).catch(console.error)
+    fetch('https://queue.simpleanalytics.io/post', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    })
+      .then((res) => res.text())
+      .then((...props) => console.log([prefix, ...props].join(' ')))
+      .catch((...props) => console.error([prefix, ...props].join(' ')));
+  }).catch((...props) => console.error([prefix, ...props].join(' ')))
 }
