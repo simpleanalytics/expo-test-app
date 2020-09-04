@@ -2,7 +2,7 @@
   <img src="https://assets.simpleanalytics.com/images/logos/logo-github-readme.png" alt="Simple Analytics logo" align="right" height="62" />
 </a>
 
-## Experimental Expo App
+# Experimental Expo App
 
 This is just an app to show how you could send events to Simple Analytics with an Expo app.
 
